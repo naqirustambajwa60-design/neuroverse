@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeuroVerse — Visual AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04050d;--panel:rgba(13,17,38,.74);--line:rgba(130,145,255,.16);--text:#e7eaff;--mute:#8a92c4;--cyan:#22d3ee;--pink:#f472b6;--violet:#a78bfa;--lime:#a3e635;--amber:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif}
+body{overflow-x:hidden;min-height:100vh}
+#bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.5}
+.aurora{position:fixed;inset:-20%;z-index:0;pointer-events:none;background:radial-gradient(40% 35% at 20% 15%,rgba(167,139,250,.16),transparent 70%),radial-gradient(35% 30% at 85% 30%,rgba(34,211,238,.12),transparent 70%),radial-gradient(40% 35% at 50% 100%,rgba(244,114,182,.10),transparent 70%);animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(3%,-2%) scale(1.06)}}
+header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:12px 22px;background:rgba(4,5,13,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;color:var(--text)}
+.logo i{width:24px;height:24px;border-radius:50%;background:conic-gradient(var(--cyan),var(--violet),var(--pink),var(--cyan));animation:spin 5s linear infinite;box-shadow:0 0 18px var(--violet)}
+@keyframes spin{to{transform:rotate(360deg)}}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+nav::-webkit-scrollbar{display:none}
+nav a{color:var(--mute);text-decoration:none;padding:8px 13px;border-radius:999px;font-size:14px;white-space:nowrap;transition:.25s}
+nav a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+nav a.on{color:#05060f;background:linear-gradient(90deg,var(--cyan),var(--violet));font-weight:600}
+main{position:relative;z-index:1}
+.page{display:none;padding:34px 22px 70px;max-width:1300px;margin:0 auto}
+.page.on{display:block;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.kicker{font-family:'JetBrains Mono';font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:clamp(38px,6vw,76px);line-height:1.02;letter-spacing:-1.5px;margin:14px 0 18px}
+h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.8px;margin:8px 0 10px}
+h3{font-size:20px;margin-bottom:8px}
+h4{font-size:12px;font-family:'JetBrains Mono';letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);margin:14px 0 10px}
+.grad{background:linear-gradient(90deg,var(--cyan),var(--violet) 50%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mute);font-size:17px;line-height:1.6;max-width:760px}
+.head{margin-bottom:22px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;backdrop-filter:blur(10px);position:relative}
+.cv{width:100%;display:block;border-radius:12px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}
+.tri{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;gap:18px}
+@media(max-width:1050px){.tri{grid-template-columns:1fr 1fr}.tri>.panel:nth-child(2){grid-column:1/-1;order:-1}}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+@media(max-width:640px){.tri{grid-template-columns:1fr}}
+.ctrl{margin-bottom:12px}
+.ctrl label{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:6px}
+.ctrl label b{font-family:'JetBrains Mono';color:var(--text);font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(167,139,250,.35),0 0 14px var(--violet);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 14px var(--violet);cursor:pointer}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.btn{font-family:inherit;font-size:13px;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line);padding:7px 12px;border-radius:10px;cursor:pointer;transition:.2s}
+.seg button:hover,.btn:hover{border-color:var(--violet);background:rgba(167,139,250,.12)}
+.seg button.on{background:linear-gradient(90deg,rgba(34,211,238,.25),rgba(167,139,250,.3));border-color:var(--cyan)}
+.btn.pri{background:linear-gradient(90deg,var(--cyan),var(--violet));color:#05060f;font-weight:700;border:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stat{flex:1;min-width:80px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:'JetBrains Mono';font-size:20px}
+.stat span{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:1px}
+.eq{font-family:'JetBrains Mono';font-size:14px;line-height:1.9;margin-top:12px;padding:12px 14px;background:rgba(0,0,0,.25);border-radius:12px;border:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+.c-cy{color:var(--cyan)}.c-pk{color:var(--pink)}.c-vi{color:var(--violet)}.c-li{color:var(--lime)}.c-am{color:var(--amber)}
+.note{font-size:13px;color:var(--mute);line-height:1.6;margin-top:12px}
+.note b{color:var(--text)}
+/* layer editor */
+.led{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.lcol{display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:6px}
+.lcol button{width:26px;height:22px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-size:14px;line-height:1}
+.lcol b{font-family:'JetBrains Mono';font-size:15px}
+.lcol span{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.5px}
+/* home */
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:20px;align-items:center;min-height:calc(100vh - 140px)}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+#heroCv{width:100%;height:min(560px,70vh);display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:20px}
+.card{display:block;text-decoration:none;color:var(--text);padding:22px;border-radius:18px;background:var(--panel);border:1px solid var(--line);transition:.35s;position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;inset:-1px;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(167,139,250,.22),transparent 40%);opacity:0;transition:.3s}
+.card:hover{transform:translateY(-4px);border-color:rgba(167,139,250,.5)}
+.card:hover:before{opacity:1}
+.card *{position:relative}
+.card .num{font-family:'JetBrains Mono';font-size:12px;color:var(--cyan)}
+.card p{color:var(--mute);font-size:14px;line-height:1.55;margin-top:6px}
+.card .ico{font-size:28px;margin:10px 0}
+section.block{margin-top:80px}
+.venn{display:grid;grid-template-columns:420px 1fr;gap:30px;align-items:center}
+@media(max-width:900px){.venn{grid-template-columns:1fr}}
+.rings text{font-family:'Space Grotesk';font-size:15px;fill:#fff;text-anchor:middle;font-weight:600}
+.rings .spin{transform-origin:200px 200px;animation:spin 30s linear infinite}
+.rings .spin2{transform-origin:200px 200px;animation:spin 18s linear infinite reverse}
+.rings .pulse{animation:breathe 4s ease-in-out infinite;transform-origin:200px 200px}
+@keyframes breathe{50%{transform:scale(1.04)}}
+.def{padding:16px 0;border-bottom:1px solid var(--line)}
+.def h3 span{font-family:'JetBrains Mono';font-size:12px;margin-right:8px}
+.def p{color:var(--mute);line-height:1.6;font-size:15px}
+.tl{display:flex;gap:14px;overflow-x:auto;padding:10px 2px 18px;scroll-snap-type:x mandatory}
+.tl .it{flex:0 0 220px;scroll-snap-align:start;padding:18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);position:relative}
+.tl .it:before{content:"";position:absolute;top:-1px;left:18px;right:18px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--pink))}
+.tl .y{font-family:'JetBrains Mono';font-size:22px;font-weight:600}
+.tl p{color:var(--mute);font-size:13px;line-height:1.5;margin-top:6px}
+/* cnn */
+.cnnGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media(max-width:900px){.cnnGrid{grid-template-columns:1fr}}
+.sq{aspect-ratio:1;width:100%;display:block;border-radius:10px;touch-action:none}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:200px}
+.kgrid input{width:100%;font-family:'JetBrains Mono';font-size:14px;text-align:center;padding:8px 0;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text)}
+.calc{font-family:'JetBrains Mono';font-size:12px;line-height:1.7;color:var(--mute)}
+.mat{display:inline-grid;grid-template-columns:repeat(3,44px);gap:3px;vertical-align:middle}
+.mat div{text-align:center;padding:4px 0;border-radius:5px;background:rgba(255,255,255,.04);color:var(--text);font-size:11px}
+.tip{position:absolute;pointer-events:none;background:rgba(5,6,20,.92);border:1px solid var(--violet);border-radius:8px;padding:6px 9px;font-family:'JetBrains Mono';font-size:12px;display:none;z-index:5}
+footer{position:relative;z-index:1;text-align:center;color:var(--mute);font-size:13px;padding:30px 0 40px}
+textarea,input[type=text]{width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);outline:none}
+input[type=text]:focus{border-color:var(--violet)}
+</style>
+</head>
+<body>
+<canvas id="bgfx"></canvas><div class="aurora"></div>
+<header>
+  <a class="logo" href="#home"><i></i>NeuroVerse</a>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#neuron">Neuron</a>
+    <a href="#network">Network</a>
+    <a href="#train">Training Lab</a>
+    <a href="#optim">Gradient Descent</a>
+    <a href="#cnn">CNN Vision</a>
+    <a href="#attention">Attention</a>
+  </nav>
+</header>
+
+<main>
+<!-- ================= HOME ================= -->
+<section class="page" id="home">
+  <div class="hero">
+    <div>
+      <span class="kicker">An interactive journey into machine intelligence</span>
+      <h1>Inside the mind<br>of a <span class="grad">machine</span>.</h1>
+      <p class="lead">From one tiny artificial neuron to networks that see, learn and pay attention. Every page here is live: drag, draw, train and watch the maths move.</p>
+      <div class="row" style="margin-top:26px">
+        <a class="btn pri" href="#neuron" style="text-decoration:none;padding:12px 20px">Start with a neuron →</a>
+        <a class="btn" href="#train" style="text-decoration:none;padding:12px 20px">Train a real network</a>
+      </div>
+    </div>
+    <canvas id="heroCv"></canvas>
+  </div>
+
+  <section class="block">
+    <span class="kicker">The big picture</span>
+    <h2>AI ⊃ ML ⊃ DL</h2>
+    <div class="venn">
+      <svg viewBox="0 0 400 400" class="rings">
+        <defs>
+          <radialGradient id="ga"><stop offset="0" stop-color="#a78bfa" stop-opacity=".05"/><stop offset="1" stop-color="#a78bfa" stop-opacity=".22"/></radialGradient>
+          <radialGradient id="gb"><stop offset="0" stop-color="#22d3ee" stop-opacity=".05"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".3"/></radialGradient>
+          <radialGradient id="gc"><stop offset="0" stop-color="#f472b6" stop-opacity=".25"/><stop offset="1" stop-color="#f472b6" stop-opacity=".45"/></radialGradient>
+        </defs>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="#a78bfa" stroke-opacity=".5" stroke-dasharray="3 9" class="spin"/>
+        <circle cx="200" cy="200" r="182" fill="url(#ga)" stroke="#a78bfa" stroke-opacity=".6"/>
+        <circle cx="200" cy="232" r="128" fill="url(#gb)" stroke="#22d3ee" stroke-opacity=".7"/>
+        <circle cx="200" cy="232" r="136" fill="none" stroke="#22d3ee" stroke-opacity=".5" stroke-dasharray="2 7" class="spin2" style="transform-origin:200px 232px"/>
+        <g class="pulse" style="transform-origin:200px 268px"><circle cx="200" cy="268" r="74" fill="url(#gc)" stroke="#f472b6"/></g>
+        <text x="200" y="58">Artificial Intelligence</text>
+        <text x="200" y="146">Machine Learning</text>
+        <text x="200" y="262">Deep</text><text x="200" y="282">Learning</text>
+      </svg>
+      <div>
+        <div class="def"><h3><span class="c-vi">AI</span>Artificial Intelligence</h3><p>Any technique that lets a computer do things we'd call intelligent: planning, reasoning, perceiving, talking. Includes hand-written rules and search, not just learning.</p></div>
+        <div class="def"><h3><span class="c-cy">ML</span>Machine Learning</h3><p>Instead of writing the rules, we show examples and let an algorithm <b>learn</b> the rules from data. Decision trees, SVMs, linear regression and neural nets all live here.</p></div>
+        <div class="def" style="border:0"><h3><span class="c-pk">DL</span>Deep Learning</h3><p>Machine learning with <b>many-layered neural networks</b>. Each layer learns features built from the layer before: edges → shapes → objects. It powers vision, speech and large language models.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="kicker">Explore</span>
+    <h2>Six worlds, one idea</h2>
+    <div class="cards" id="homeCards">
+      <a class="card" href="#neuron"><span class="num">01</span><div class="ico">◉</div><h3>The Neuron</h3><p>Weights, bias and activation functions. Tune every knob of a single neuron and watch signals flow.</p></a>
+      <a class="card" href="#network"><span class="num">02</span><div class="ico">⋔</div><h3>Forward Propagation</h3><p>Build your own architecture and watch activations ripple layer by layer.</p></a>
+      <a class="card" href="#train"><span class="num">03</span><div class="ico">◐</div><h3>Training Lab</h3><p>A real neural network trained live in your browser with backpropagation. See it carve decision boundaries.</p></a>
+      <a class="card" href="#optim"><span class="num">04</span><div class="ico">⛰</div><h3>Gradient Descent</h3><p>SGD vs Momentum vs RMSProp vs Adam racing down loss landscapes. Click anywhere to drop them.</p></a>
+      <a class="card" href="#cnn"><span class="num">05</span><div class="ico">▦</div><h3>CNN Vision</h3><p>Draw a digit and watch convolution kernels slide across it to extract edges and features.</p></a>
+      <a class="card" href="#attention"><span class="num">06</span><div class="ico">⟿</div><h3>Attention</h3><p>The heart of Transformers and LLMs: how every word decides which other words to look at.</p></a>
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="kicker">How we got here</span>
+    <h2>A short history of neural nets</h2>
+    <div class="tl">
+      <div class="it"><div class="y c-cy">1943</div><p>McCulloch &amp; Pitts publish the first mathematical model of a neuron.</p></div>
+      <div class="it"><div class="y c-cy">1958</div><p>Rosenblatt's Perceptron: a neuron that learns its own weights from data.</p></div>
+      <div class="it"><div class="y c-vi">1986</div><p>Rumelhart, Hinton &amp; Williams popularise backpropagation for multi-layer networks.</p></div>
+      <div class="it"><div class="y c-vi">1998</div><p>LeCun's LeNet-5 uses convolutional networks to read handwritten digits.</p></div>
+      <div class="it"><div class="y c-pk">2012</div><p>AlexNet wins ImageNet by a huge margin on GPUs. The deep learning boom begins.</p></div>
+      <div class="it"><div class="y c-pk">2014</div><p>Generative Adversarial Networks: two networks compete to generate realistic images.</p></div>
+      <div class="it"><div class="y c-am">2017</div><p>"Attention Is All You Need" introduces the Transformer architecture.</p></div>
+      <div class="it"><div class="y c-li">2020s</div><p>Large language models and multimodal AI scale Transformers to billions of parameters.</p></div>
+    </div>
+  </section>
+</section>
+
+<!-- ================= NEURON ================= -->
+<section class="page" id="neuron">
+  <div class="head"><span class="kicker">01 · The building block</span><h2>The Artificial Neuron</h2>
+  <p class="lead">A neuron multiplies each input by a <span class="c-cy">weight</span>, adds them up with a <span class="c-am">bias</span>, then passes the sum through an <span class="c-vi">activation function</span>. That's it. Everything else is this, repeated millions of times.</p></div>
+  <div class="split">
+    <div class="panel"><canvas id="nCv" class="cv" style="height:440px"></canvas><div class="eq" id="nEq"></div>
+      <p class="note">Cyan connections are <b>positive</b> weights (excite), pink are <b>negative</b> (inhibit). Thickness shows weight magnitude, and pulse size shows how much each input actually contributes (w·x).</p></div>
+    <div class="panel"><h4 style="margin-top:0">Inputs &amp; weights</h4><div id="nCtrls"></div>
+      <h4>Activation function</h4><div class="seg" id="nAct"></div>
+      <canvas id="nAg" class="cv" style="height:160px;margin-top:12px;background:rgba(0,0,0,.25)"></canvas></div>
+  </div>
+</section>
+
+<!-- ================= NETWORK ================= -->
+<section class="page" id="network">
+  <div class="head"><span class="kicker">02 · Stacking neurons</span><h2>Forward Propagation</h2>
+  <p class="lead">Connect neurons into layers and the output of one layer becomes the input of the next. Design an architecture below and watch a signal ripple from input to output. Hover any neuron to read its value.</p></div>
+  <div class="panel"><div style="position:relative"><canvas id="wCv" class="cv" style="height:480px"></canvas><div class="tip" id="wTip"></div></div>
+    <div class="row" style="justify-content:space-between;margin-top:14px;align-items:flex-end">
+      <div><h4 style="margin-top:0">Architecture</h4><div class="led" id="wLed"></div></div>
+      <div style="min-width:240px;flex:0 1 300px"><div id="wSpd"></div><div class="row"><button class="btn pri" id="wFire">⚡ Fire new input</button><button class="btn" id="wRand">🎲 New weights</button><button class="btn" id="wAuto">Auto: on</button></div></div>
+    </div>
+    <div class="stats" id="wStats"></div>
+  </div>
+</section>
+
+<!-- ================= TRAINING ================= -->
+<section class="page" id="train">
+  <div class="head"><span class="kicker">03 · Learning from data</span><h2>The Training Lab</h2>
+  <p class="lead">This is a <b>real</b> neural network training in your browser with backpropagation and gradient descent. It must learn to separate the <span class="c-cy">cyan</span> points from the <span class="c-pk">pink</span> ones. The background shows what it currently believes; watch it bend its boundary to fit the data.</p></div>
+  <div class="tri">
+    <div class="panel">
+      <h4 style="margin-top:0">Dataset</h4><div class="seg" id="tData"></div>
+      <div id="tNoise" style="margin-top:12px"></div>
+      <h4>Hidden layers</h4><div class="led" id="tLed"></div>
+      <h4>Activation</h4><div class="seg" id="tAct"></div>
+      <h4>Learning rate</h4><div class="seg" id="tLr"></div>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <div class="row"><button class="btn pri" id="tPlay">▶ Train</button><button class="btn" id="tStep">Step</button><button class="btn" id="tReset">↺ Reset</button></div>
+        <div class="row" style="font-family:'JetBrains Mono';font-size:13px;color:var(--mute)">epoch <b id="tEp" style="color:#fff;margin-left:6px">0</b></div>
+      </div>
+      <canvas id="tCv" class="sq" style="max-width:560px;margin:0 auto"></canvas>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0">Loss (binary cross-entropy)</h4>
+      <canvas id="tLoss" class="cv" style="height:130px;background:rgba(0,0,0,.25)"></canvas>
+      <div class="stats"><div class="stat"><b id="tL">–</b><span>loss</span></div><div class="stat"><b id="tA">–</b><span>accuracy</span></div></div>
+      <h4>Inside the network</h4>
+      <canvas id="tNet" class="cv" style="height:300px"></canvas>
+      <p class="note">Each tile shows what one neuron responds to across the whole input space. Deeper neurons combine simpler shapes into complex ones.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OPTIM ================= -->
+<section class="page" id="optim">
+  <div class="head"><span class="kicker">04 · How learning moves</span><h2>Gradient Descent Race</h2>
+  <p class="lead">Training means rolling downhill on a <b>loss landscape</b>. Four optimizers start from the same spot. Bright = high loss, dark = low. <b>Click anywhere</b> on the map to drop them somewhere new.</p></div>
+  <div class="split">
+    <div class="panel"><canvas id="oCv" class="cv" style="height:520px;cursor:crosshair"></canvas></div>
+    <div class="panel">
+      <h4 style="margin-top:0">Landscape</h4><div class="seg" id="oFn"></div>
+      <h4>Optimizers</h4><div id="oLeg"></div>
+      <div id="oSpd" style="margin-top:14px"></div>
+      <div class="row"><button class="btn pri" id="oPlay">⏸ Pause</button><button class="btn" id="oReset">↺ Restart</button></div>
+      <p class="note" id="oNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CNN ================= -->
+<section class="page" id="cnn">
+  <div class="head"><span class="kicker">05 · How machines see</span><h2>Convolutional Vision</h2>
+  <p class="lead"><b>Draw a digit</b> in the left box. A 3×3 <span class="c-vi">kernel</span> slides over every position, multiplies the pixels under it and sums them into one number of the <span class="c-cy">feature map</span>. Max-pooling then shrinks the map, keeping the strongest responses.</p></div>
+  <div class="cnnGrid">
+    <div class="panel"><h4 style="margin-top:0">Input · 28×28 (draw here)</h4><canvas id="cIn" class="sq" style="cursor:crosshair"></canvas>
+      <div class="row" style="margin-top:10px"><button class="btn" id="cClear">Clear</button><button class="btn" id="cSample">Sample digit</button><button class="btn pri" id="cScan">▶ Animate scan</button></div></div>
+    <div class="panel"><h4 style="margin-top:0">Feature map · 26×26</h4><canvas id="cOut" class="sq"></canvas>
+      <div class="row" style="margin-top:10px"><label class="row" style="font-size:13px;color:var(--mute);gap:6px"><input type="checkbox" id="cRelu" checked> apply ReLU</label></div></div>
+    <div class="panel"><h4 style="margin-top:0">Max-pool 2×2 · 13×13</h4><canvas id="cPool" class="sq"></canvas></div>
+  </div>
+  <div class="split" style="margin-top:18px">
+    <div class="panel"><h4 style="margin-top:0">The math at this position</h4><div class="calc" id="cCalc"></div>
+      <h4>A conv layer = many kernels in parallel</h4><canvas id="cAll" class="cv" style="height:150px"></canvas></div>
+    <div class="panel"><h4 style="margin-top:0">Kernel</h4><div class="seg" id="cK"></div><div class="kgrid" id="cKg" style="margin-top:12px"></div>
+      <p class="note">Edit the numbers yourself. In a trained CNN these values aren't hand-picked; they're <b>learned</b> by backpropagation.</p></div>
+  </div>
+</section>
+
+<!-- ================= ATTENTION ================= -->
+<section class="page" id="attention">
+  <div class="head"><span class="kicker">06 · The engine of LLMs</span><h2>Self-Attention</h2>
+  <p class="lead">In a Transformer, every token computes how much to <b>attend</b> to every other token: <span class="c-cy">softmax(Q·Kᵀ / √d)</span>. Different <b>heads</b> learn different relationships. Hover a token on the top row to see where it looks.</p></div>
+  <div class="panel" style="margin-bottom:18px"><input type="text" id="aTxt" value="The robot picked up the ball because it was light">
+    <div class="row" style="margin-top:12px;justify-content:space-between"><div class="seg" id="aHead"></div><label class="row" style="font-size:13px;color:var(--mute);gap:6px"><input type="checkbox" id="aMask"> causal mask (GPT-style)</label></div></div>
+  <div class="split">
+    <div class="panel"><canvas id="aCv" class="cv" style="height:400px"></canvas></div>
+    <div class="panel"><h4 style="margin-top:0">Attention matrix</h4><canvas id="aMat" class="sq"></canvas><p class="note" id="aNote"></p></div>
+  </div>
+  <p class="note">Patterns here are <b>illustrative</b> (generated by simple rules and hashed embeddings, not a trained model), but they mimic head types researchers have actually found in trained Transformers.</p>
+</section>
+</main>
+<footer>NeuroVerse · built with pure HTML, Canvas &amp; JavaScript · every network on this site runs live in your browser</footer>
+
+<script>
+// ===================== UTILITIES =====================
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*v)}
+function fit(cv){const r=cv.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1),w=Math.max(1,r.width),h=Math.max(1,r.height);const W=Math.round(w*d),H=Math.round(h*d);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);return{c,w,h}}
+const COL={cyan:[34,211,238],pink:[244,114,182],violet:[167,139,250],lime:[163,230,53],amber:[251,191,36],base:[10,13,32],white:[255,255,255]};
+const rgba=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+function glow(c,x,y,r,col,a){if(r<=0)return;const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(col,a));g.addColorStop(1,rgba(col,0));c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+function valCol(v){return v>=0?mix(COL.base,COL.cyan,clamp(v,0,1)):mix(COL.base,COL.pink,clamp(-v,0,1))}
+function slider(parent,label,min,max,step,val,on,dec=2){const d=document.createElement('div');d.className='ctrl';d.innerHTML=`<label><span>${label}</span><b>${(+val).toFixed(dec)}</b></label><input type="range" min="${min}" max="${max}" step="${step}" value="${val}">`;const inp=d.querySelector('input'),b=d.querySelector('b');inp.oninput=()=>{b.textContent=(+inp.value).toFixed(dec);on(+inp.value)};parent.appendChild(d);return inp}
+function seg(parent,opts,val,on){parent.innerHTML='';opts.forEach(([k,t])=>{const b=document.createElement('button');b.innerHTML=t;if(k===val)b.className='on';b.onclick=()=>{[...parent.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');on(k)};parent.appendChild(b)})}
+function layerEditor(el,arr,opt,onChange){
+  const render=()=>{el.innerHTML='';arr.forEach((n,i)=>{const col=document.createElement('div');col.className='lcol';const lab=opt.labels?opt.labels(i,arr.length):'H'+(i+1);col.innerHTML=`<button data-a="+">+</button><b>${n}</b><button data-a="-">−</button><span>${lab}</span>`;col.querySelectorAll('button').forEach(b=>b.onclick=()=>{const lim=opt.lim?opt.lim(i,arr.length):[1,opt.maxN];arr[i]=clamp(arr[i]+(b.dataset.a==='+'?1:-1),lim[0],lim[1]);render();onChange()});el.appendChild(col)});
+    const ctl=document.createElement('div');ctl.className='lcol';ctl.innerHTML=`<button data-a="add" title="add layer">+</button><b style="font-size:11px">layer</b><button data-a="rm" title="remove layer">−</button><span>${arr.length-(opt.fixed||0)} hid.</span>`;
+    ctl.querySelector('[data-a=add]').onclick=()=>{if(arr.length<opt.maxL){arr.splice(opt.insertAt?opt.insertAt(arr.length):arr.length,0,4);render();onChange()}};
+    ctl.querySelector('[data-a=rm]').onclick=()=>{if(arr.length>opt.minL){arr.splice(opt.removeAt?opt.removeAt(arr.length):arr.length-1,1);render();onChange()}};el.appendChild(ctl)};
+  render();return render}
+const ACT={
+  sigmoid:{n:'Sigmoid',s:'σ',f:z=>1/(1+Math.exp(-z)),yr:[-.2,1.2]},
+  tanh:{n:'Tanh',s:'tanh',f:Math.tanh,yr:[-1.2,1.2]},
+  relu:{n:'ReLU',s:'ReLU',f:z=>Math.max(0,z),yr:[-1,5]},
+  leaky:{n:'Leaky ReLU',s:'LReLU',f:z=>z>0?z:.1*z,yr:[-1,5]},
+  gelu:{n:'GELU',s:'GELU',f:z=>.5*z*(1+Math.tanh(Math.sqrt(2/Math.PI)*(z+.044715*z*z*z))),yr:[-1,5]},
+  step:{n:'Step',s:'step',f:z=>z>=0?1:0,yr:[-.2,1.2]}
+};
+
+// ===================== ROUTER & LOOP =====================
+const pages={};let current='home';
+function route(){show((location.hash||'#home').slice(1))}
+function show(id){if(!document.getElementById(id)||!$('#'+id).classList.contains('page'))id='home';$$('.page').forEach(p=>p.classList.toggle('on',p.id===id));$$('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));current=id;pages[id]&&pages[id].enter&&pages[id].enter();window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;e.preventDefault();const id=a.getAttribute('href').slice(1);try{history.replaceState(null,'','#'+id)}catch(_){}show(id)});
+
+// ===================== BACKGROUND =====================
+const BG={p:[],m:{x:-999,y:-999}};
+window.addEventListener('mousemove',e=>{BG.m.x=e.clientX;BG.m.y=e.clientY});
+function initBg(){BG.p=[];const n=Math.min(85,Math.floor(innerWidth*innerHeight/17000));for(let i=0;i<n;i++)BG.p.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
+function drawBg(){const{c,w,h}=fit($('#bgfx'));c.clearRect(0,0,w,h);const P=BG.p;for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x+=w;if(p.x>w)p.x-=w;if(p.y<0)p.y+=h;if(p.y>h)p.y-=h;const dx=p.x-BG.m.x,dy=p.y-BG.m.y,d=Math.hypot(dx,dy);if(d<120){p.x+=dx/d*.8;p.y+=dy/d*.8}}
+  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const d=Math.hypot(P[i].x-P[j].x,P[i].y-P[j].y);if(d<130){c.strokeStyle=rgba(COL.violet,(1-d/130)*.35);c.lineWidth=1;c.beginPath();c.moveTo(P[i].x,P[i].y);c.lineTo(P[j].x,P[j].y);c.stroke()}}
+  for(const p of P){c.fillStyle=rgba(COL.cyan,.7);c.beginPath();c.arc(p.x,p.y,1.4,0,TAU);c.fill()}}
+window.addEventListener('resize',initBg);
+
+// ===================== HOME: 3D NETWORK =====================
+(()=>{const cv=$('#heroCv');const L=[4,7,10,10,7,3];const nodes=[],edges=[],out={};let rot=0,tilt=.25,tx=.25,pulses=[];
+  L.forEach((n,l)=>{for(let i=0;i<n;i++){const a=i/n*TAU+l*.4,r=n>1?.3+n*.06:0;nodes.push({l,x:(l-(L.length-1)/2)*1.05,y:Math.cos(a)*r,z:Math.sin(a)*r,g:0,id:nodes.length})}});
+  nodes.forEach(a=>{out[a.id]=[]});
+  nodes.forEach(a=>nodes.forEach(b=>{if(b.l===a.l+1){const e={a,b,w:Math.random()};edges.push(e);out[a.id].push(e)}}));
+  cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();tx=((e.clientY-r.top)/r.height-.5)*.8});
+  pages.home={frame(){const{c,w,h}=fit(cv);c.clearRect(0,0,w,h);rot+=.004;tilt+=(tx-tilt)*.05;
+    const sc=Math.min(w/6.4,h/3.6),cs=Math.cos(rot),sn=Math.sin(rot),ct=Math.cos(tilt),st=Math.sin(tilt);
+    const P=new Map();nodes.forEach(n=>{let x=n.x*cs-n.z*sn,z=n.x*sn+n.z*cs,y=n.y;let y2=y*ct-z*st,z2=y*st+z*ct;const per=3.2/(3.2+z2);P.set(n,{x:w/2+x*sc*per,y:h/2+y2*sc*per,s:per,z:z2})});
+    if(Math.random()<.35&&pulses.length<140){const st0=nodes.filter(n=>n.l===0);const n=st0[Math.random()*st0.length|0];const es=out[n.id];pulses.push({e:es[Math.random()*es.length|0],t:0})}
+    c.lineWidth=1;edges.forEach(e=>{const A=P.get(e.a),B=P.get(e.b);c.strokeStyle=rgba(mix(COL.violet,COL.cyan,e.w),.05+.06*A.s);c.beginPath();c.moveTo(A.x,A.y);c.lineTo(B.x,B.y);c.stroke()});
+    pulses=pulses.filter(p=>{p.t+=.022;const A=P.get(p.e.a),B=P.get(p.e.b);const x=lerp(A.x,B.x,p.t),y=lerp(A.y,B.y,p.t);c.strokeStyle=rgba(COL.cyan,.5);c.lineWidth=1.5;c.beginPath();c.moveTo(lerp(A.x,B.x,Math.max(0,p.t-.15)),lerp(A.y,B.y,Math.max(0,p.t-.15)));c.lineTo(x,y);c.stroke();glow(c,x,y,9,COL.cyan,.7);
+      if(p.t>=1){p.e.b.g=1;const es=out[p.e.b.id];if(es.length&&Math.random()<.85){pulses.push({e:es[Math.random()*es.length|0],t:0});if(Math.random()<.3)pulses.push({e:es[Math.random()*es.length|0],t:0})}return false}return true});
+    [...nodes].sort((a,b)=>P.get(b).z-P.get(a).z).forEach(n=>{const p=P.get(n);n.g*=.94;const r=(4+n.g*3)*p.s*1.3;const col=mix(COL.violet,COL.pink,n.l/(L.length-1));glow(c,p.x,p.y,r*4+n.g*14,n.g>.1?COL.cyan:col,.25+n.g*.5);c.fillStyle=rgba(mix(col,COL.white,n.g),.95);c.beginPath();c.arc(p.x,p.y,r,0,TAU);c.fill()});
+    c.font='11px JetBrains Mono';c.fillStyle='rgba(138,146,196,.7)';c.textAlign='center';c.fillText('input → hidden layers → output',w/2,h-10)}};
+  $$('.card').forEach(cd=>cd.addEventListener('mousemove',e=>{const r=cd.getBoundingClientRect();cd.style.setProperty('--mx',(e.clientX-r.left)+'px');cd.style.setProperty('--my',(e.clientY-r.top)+'px')}));
+})();
+
+// ===================== NEURON =====================
+(()=>{const S={x:[.8,.3,-.5],w:[.9,-.6,.4],b:.1,act:'sigmoid',pulses:[],out:[],tick:0,flash:0};
+  const cv=$('#nCv'),ag=$('#nAg'),box=$('#nCtrls');
+  for(let i=0;i<3;i++){slider(box,`Input x<sub>${i+1}</sub>`,-1,1,.01,S.x[i],v=>S.x[i]=v);slider(box,`Weight w<sub>${i+1}</sub>`,-2,2,.01,S.w[i],v=>S.w[i]=v)}
+  slider(box,'Bias b',-2,2,.01,S.b,v=>S.b=v);
+  seg($('#nAct'),Object.keys(ACT).map(k=>[k,ACT[k].n]),S.act,k=>S.act=k);
+  const calc=()=>{let z=S.b;for(let i=0;i<3;i++)z+=S.x[i]*S.w[i];return{z,a:ACT[S.act].f(z)}};
+  function node(c,x,y,r,v,label){const col=valCol(v);glow(c,x,y,r*2.2,v>=0?COL.cyan:COL.pink,.15+Math.min(.4,Math.abs(v)*.4));c.fillStyle=rgba(col,1);c.beginPath();c.arc(x,y,r,0,TAU);c.fill();c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=1.5;c.stroke();c.fillStyle='#fff';c.font='600 12px JetBrains Mono';c.textAlign='center';c.textBaseline='middle';c.fillText(label,x,y)}
+  function graph(z,a){const{c,w,h}=fit(ag);c.clearRect(0,0,w,h);const A=ACT[S.act],[y0,y1]=A.yr,X=x=>(x+6)/12*w,Y=y=>h-(y-y0)/(y1-y0)*h;
+    c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;c.beginPath();c.moveTo(0,Y(0));c.lineTo(w,Y(0));c.moveTo(X(0),0);c.lineTo(X(0),h);c.stroke();
+    c.strokeStyle=rgba(COL.violet,1);c.lineWidth=2.5;c.beginPath();for(let i=0;i<=200;i++){const x=-6+i*.06;const yy=Y(A.f(x));i?c.lineTo(X(x),yy):c.moveTo(X(x),yy)}c.stroke();
+    const zx=clamp(z,-6,6),px=X(zx),py=Y(clamp(A.f(zx),y0,y1));c.setLineDash([4,4]);c.strokeStyle='rgba(255,255,255,.4)';c.beginPath();c.moveTo(px,h);c.lineTo(px,py);c.lineTo(0,py);c.stroke();c.setLineDash([]);glow(c,px,py,16,COL.lime,.8);c.fillStyle='#fff';c.beginPath();c.arc(px,py,4,0,TAU);c.fill();
+    c.fillStyle='#8a92c4';c.font='11px JetBrains Mono';c.textAlign='left';c.textBaseline='top';c.fillText(`${A.n}(z)`,8,6);c.textAlign='right';c.fillText('z →',w-6,Y(0)+4)}
+  pages.neuron={frame(){const{c,w,h}=fit(cv);c.clearRect(0,0,w,h);const{z,a}=calc();S.tick++;
+    const R=Math.min(62,h*.14,w*.1),cx=w*.56,cy=h*.46,ox=w*.88,ix=w*.13;const ins=[0,1,2].map(i=>({x:ix,y:h*(.16+.28*i)}));
+    if(S.tick%24===0)for(let i=0;i<3;i++)S.pulses.push({i,t:0});
+    c.textAlign='center';c.textBaseline='middle';
+    ins.forEach((p,i)=>{const s=S.w[i],col=s>=0?COL.cyan:COL.pink;c.strokeStyle=rgba(col,.25+Math.min(.55,Math.abs(s)*.3));c.lineWidth=1+Math.abs(s)*4;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(cx-R*.92,cy+(i-1)*R*.3);c.stroke();
+      const mx=lerp(p.x,cx,.48),my=lerp(p.y,cy,.48);c.font='600 12px JetBrains Mono';c.fillStyle=rgba(col,1);c.fillText(`w${i+1}=${s.toFixed(2)}`,mx,my-12)});
+    const by=h*.9;c.strokeStyle=rgba(COL.amber,.6);c.lineWidth=1+Math.abs(S.b)*3;c.beginPath();c.moveTo(cx,by-16);c.lineTo(cx,cy+R);c.stroke();
+    c.strokeStyle=rgba(COL.lime,.55);c.lineWidth=3;c.beginPath();c.moveTo(cx+R,cy);c.lineTo(ox-28,cy);c.stroke();
+    S.pulses=S.pulses.filter(p=>{p.t+=.013;const A0=ins[p.i];const x=lerp(A0.x,cx-R*.92,p.t),y=lerp(A0.y,cy+(p.i-1)*R*.3,p.t);const s=S.x[p.i]*S.w[p.i];const col=s>=0?COL.cyan:COL.pink;const r=1.5+Math.min(6,Math.abs(s)*6);glow(c,x,y,r*4,col,.6);c.fillStyle='#fff';c.beginPath();c.arc(x,y,r*.55,0,TAU);c.fill();if(p.t>=1){S.flash=1;if(p.i===0)S.out.push({t:0});return false}return true});
+    S.out=S.out.filter(p=>{p.t+=.02;const x=lerp(cx+R,ox-28,p.t);glow(c,x,cy,20,COL.lime,.7);c.fillStyle='#fff';c.beginPath();c.arc(x,cy,3,0,TAU);c.fill();return p.t<1});
+    S.flash*=.93;
+    ins.forEach((p,i)=>{node(c,p.x,p.y,25,S.x[i],S.x[i].toFixed(2));c.fillStyle='#8a92c4';c.font='13px Space Grotesk';c.fillText('x'+(i+1),p.x-44,p.y)});
+    node(c,cx,by,16,S.b/2,'b');c.fillStyle=rgba(COL.amber,1);c.font='12px JetBrains Mono';c.fillText('bias '+S.b.toFixed(2),cx+62,by);
+    const A=ACT[S.act],na=clamp((a-A.yr[0])/(A.yr[1]-A.yr[0]),0,1);
+    glow(c,cx,cy,R*2.8,COL.violet,.2+.45*na+.25*S.flash);
+    c.fillStyle='#0c1030';c.beginPath();c.arc(cx,cy,R,0,TAU);c.fill();c.lineWidth=2.5;c.strokeStyle=rgba(mix(COL.violet,COL.white,S.flash*.6),1);c.stroke();
+    c.strokeStyle='rgba(167,139,250,.5)';c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-R);c.lineTo(cx,cy+R);c.stroke();
+    c.fillStyle='#fff';c.font=`700 ${R*.55}px Space Grotesk`;c.fillText('Σ',cx-R*.45,cy-R*.08);c.font=`600 ${Math.max(10,R*.24)}px JetBrains Mono`;c.fillStyle=rgba(COL.violet,1);c.fillText(A.s,cx+R*.48,cy-R*.08);
+    c.font='11px JetBrains Mono';c.fillStyle='#8a92c4';c.fillText('z='+z.toFixed(2),cx-R*.45,cy+R*.45);c.fillText('f(z)',cx+R*.48,cy+R*.45);
+    node(c,ox,cy,28,clamp(a,-1,1),a.toFixed(2));c.fillStyle='#8a92c4';c.font='13px Space Grotesk';c.fillText('output',ox,cy+46);
+    graph(z,a);
+    const t=[0,1,2].map(i=>`(<span class="c-cy">${S.x[i].toFixed(2)}</span>×<span class="${S.w[i]>=0?'c-cy':'c-pk'}">${S.w[i].toFixed(2)}</span>)`).join(' + ');
+    $('#nEq').innerHTML=`z = ${t} + <span class="c-am">${S.b.toFixed(2)}</span> = <b>${z.toFixed(3)}</b><br>a = <span class="c-vi">${A.n}</span>(${z.toFixed(3)}) = <b class="c-li">${a.toFixed(3)}</b>`}};
+})();
+
+// ===================== NETWORK =====================
+(()=>{const cv=$('#wCv'),tip=$('#wTip'),S={sizes:[3,5,6,4,2],W:[],B:[],v:[],p:0,hold:0,speed:1,auto:true,mx:-1,my:-1};
+  function init(){S.W=[];S.B=[];for(let l=0;l<S.sizes.length-1;l++){const n=S.sizes[l+1],m=S.sizes[l];S.W.push(Array.from({length:n},()=>Array.from({length:m},()=>gauss()*1.6/Math.sqrt(m))));S.B.push(Array.from({length:n},()=>gauss()*.3))}fire()}
+  function fire(){S.v=[Array.from({length:S.sizes[0]},()=>Math.random()*2-1)];for(let l=0;l<S.W.length;l++){const prev=S.v[l];S.v.push(S.W[l].map((row,i)=>Math.tanh(row.reduce((s,w,j)=>s+w*prev[j],S.B[l][i]))))}S.p=0;S.hold=0;stats()}
+  function stats(){let p=0,n=0;S.sizes.forEach((s,l)=>{n+=s;if(l<S.sizes.length-1)p+=s*S.sizes[l+1]+S.sizes[l+1]});$('#wStats').innerHTML=`<div class="stat"><b>${S.sizes.length}</b><span>layers</span></div><div class="stat"><b>${n}</b><span>neurons</span></div><div class="stat"><b>${p}</b><span>parameters</span></div><div class="stat"><b>tanh</b><span>activation</span></div>`}
+  layerEditor($('#wLed'),S.sizes,{maxN:9,maxL:7,minL:2,fixed:2,labels:(i,n)=>i===0?'in':i===n-1?'out':'H'+i,insertAt:n=>n-1,removeAt:n=>n-2,lim:()=>[1,9]},init);
+  slider($('#wSpd'),'Propagation speed',.3,3,.1,1,v=>S.speed=v,1);
+  $('#wFire').onclick=fire;$('#wRand').onclick=init;$('#wAuto').onclick=e=>{S.auto=!S.auto;e.target.textContent='Auto: '+(S.auto?'on':'off')};
+  cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();S.mx=e.clientX-r.left;S.my=e.clientY-r.top});cv.addEventListener('mouseleave',()=>{S.mx=-1;tip.style.display='none'});
+  init();
+  pages.network={frame(){const{c,w,h}=fit(cv);c.clearRect(0,0,w,h);const L=S.sizes.length-1;
+    if(S.p<L)S.p=Math.min(L,S.p+.012*S.speed);else if(S.auto&&++S.hold>70)fire();
+    const pad=Math.min(80,w*.08),maxN=Math.max(...S.sizes),gap=Math.min(52,(h-60)/maxN);const X=l=>pad+l*(w-2*pad)/L,Y=(l,i)=>h/2+(i-(S.sizes[l]-1)/2)*gap;const lay=Math.floor(S.p),fr=S.p-lay;
+    for(let l=0;l<L;l++){const done=l<lay||S.p>=L;S.W[l].forEach((row,i)=>row.forEach((wt,j)=>{const str=Math.abs(wt*S.v[l][j]);const col=wt>=0?COL.cyan:COL.pink;c.strokeStyle=rgba(col,done?.12+Math.min(.6,str*.7):.06+Math.abs(wt)*.08);c.lineWidth=done?.6+Math.min(3,str*3):.8;c.beginPath();c.moveTo(X(l),Y(l,j));c.lineTo(X(l+1),Y(l+1,i));c.stroke();
+        if(l===lay&&S.p<L&&str>.08){const x=lerp(X(l),X(l+1),fr),y=lerp(Y(l,j),Y(l+1,i),fr);glow(c,x,y,4+str*8,col,.7)}}))}
+    let hov=null;
+    S.sizes.forEach((n,l)=>{for(let i=0;i<n;i++){const x=X(l),y=Y(l,i),r=Math.min(15,gap*.33);const known=l===0||S.p>=l;const v=known?S.v[l][i]:0;
+      if(known)glow(c,x,y,r*2.6,v>=0?COL.cyan:COL.pink,Math.abs(v)*.55);c.fillStyle=rgba(known?valCol(v):COL.base,1);c.beginPath();c.arc(x,y,r,0,TAU);c.fill();c.strokeStyle=known?'rgba(255,255,255,.6)':'rgba(255,255,255,.2)';c.lineWidth=1.5;c.stroke();
+      if(Math.hypot(S.mx-x,S.my-y)<r+4)hov={l,i,x,y,v,known}}});
+    c.font='12px JetBrains Mono';c.fillStyle='#8a92c4';c.textAlign='center';S.sizes.forEach((n,l)=>c.fillText(l===0?'INPUT':l===L?'OUTPUT':'HIDDEN '+l,X(l),18));
+    if(hov){tip.style.display='block';tip.style.left=Math.min(hov.x+16,w-150)+'px';tip.style.top=(hov.y-14)+'px';tip.innerHTML=`layer ${hov.l} · neuron ${hov.i+1}<br><b style="color:${hov.v>=0?'#22d3ee':'#f472b6'}">${hov.known?hov.v.toFixed(3):'waiting…'}</b>`}else tip.style.display='none'}};
+})();
+
+// ===================== TRAINING LAB =====================
+class MLP{constructor(s,act){this.s=s;this.act=act;this.W=[];this.B=[];for(let l=0;l<s.length-1;l++){const n=s[l+1],m=s[l],w=new Float64Array(n*m),sc=Math.sqrt(2/(m+n))*1.3;for(let k=0;k<n*m;k++)w[k]=gauss()*sc;this.W.push(w);this.B.push(new Float64Array(n).fill(.05))}}
+  f(z){return this.act==='relu'?(z>0?z:0):this.act==='sigmoid'?1/(1+Math.exp(-z)):Math.tanh(z)}
+  df(z,a){return this.act==='relu'?(z>0?1:0):this.act==='sigmoid'?a*(1-a):1-a*a}
+  forward(x){const A=[x],Z=[null];let a=x;const L=this.s.length-1;for(let l=0;l<L;l++){const n=this.s[l+1],m=this.s[l],W=this.W[l],B=this.B[l],z=new Float64Array(n),o=new Float64Array(n);for(let i=0;i<n;i++){let s=B[i];for(let j=0;j<m;j++)s+=W[i*m+j]*a[j];z[i]=s;o[i]=l===L-1?1/(1+Math.exp(-s)):this.f(s)}Z.push(z);A.push(o);a=o}return{A,Z}}
+  predict(x,y){const r=this.forward([x,y]);return r.A[r.A.length-1][0]}
+  train(batch,lr){const L=this.s.length-1,gW=this.W.map(w=>new Float64Array(w.length)),gB=this.B.map(b=>new Float64Array(b.length));let loss=0;
+    for(const d of batch){const{A,Z}=this.forward([d.x,d.y]);const p=A[L][0];loss+=-(d.c*Math.log(p+1e-9)+(1-d.c)*Math.log(1-p+1e-9));let delta=new Float64Array([p-d.c]);
+      for(let l=L-1;l>=0;l--){const n=this.s[l+1],m=this.s[l],W=this.W[l],a=A[l];for(let i=0;i<n;i++){gB[l][i]+=delta[i];for(let j=0;j<m;j++)gW[l][i*m+j]+=delta[i]*a[j]}
+        if(l>0){const nd=new Float64Array(m);for(let j=0;j<m;j++){let s=0;for(let i=0;i<n;i++)s+=W[i*m+j]*delta[i];nd[j]=s*this.df(Z[l][j],a[j])}delta=nd}}}
+    const k=lr/batch.length;for(let l=0;l<L;l++){const W=this.W[l],B=this.B[l];for(let q=0;q<W.length;q++)W[q]-=k*gW[l][q];for(let q=0;q<B.length;q++)B[q]-=k*gB[l][q]}return loss/batch.length}}
+(()=>{const S={data:'circle',noise:.15,hidden:[6,5],act:'tanh',lr:.1,pts:[],net:null,order:[],oi:0,steps:0,play:false,hist:[],tick:0,thumbs:[]};
+  const cv=$('#tCv'),lc=$('#tLoss'),nc=$('#tNet'),off=document.createElement('canvas');off.width=off.height=70;const octx=off.getContext('2d');
+  function gen(){const n=300,P=[];for(let i=0;i<n;i++){let x,y,c=i%2;const nz=()=>gauss()*S.noise*.25;
+      if(S.data==='circle'){const r=c?Math.random()*.42:.62+Math.random()*.3,a=Math.random()*TAU;x=r*Math.cos(a);y=r*Math.sin(a)}
+      else if(S.data==='xor'){x=Math.random()*1.8-.9;y=Math.random()*1.8-.9;x+=x>0?.06:-.06;y+=y>0?.06:-.06;c=x*y>0?1:0}
+      else if(S.data==='gauss'){const cx=c?.42:-.42;x=cx+gauss()*.2;y=cx+gauss()*.2}
+      else{const t=Math.floor(i/2)/(n/2),r=t*.88+.05,a=t*3.4*Math.PI+c*Math.PI;x=r*Math.sin(a);y=r*Math.cos(a)}
+      P.push({x:clamp(x+nz(),-1.15,1.15),y:clamp(y+nz(),-1.15,1.15),c})}S.pts=P}
+  function reset(){S.net=new MLP([2,...S.hidden,1],S.act);S.steps=0;S.hist=[];S.order=[];S.oi=0;thumbs();render();evalAll()}
+  function shuffle(){S.order=S.pts.map((_,i)=>i);for(let i=S.order.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[S.order[i],S.order[j]]=[S.order[j],S.order[i]]}S.oi=0}
+  function step(){if(S.oi>=S.order.length)shuffle();const b=[];for(let k=0;k<10&&S.oi<S.order.length;k++)b.push(S.pts[S.order[S.oi++]]);S.net.train(b,S.lr);S.steps++}
+  function evalAll(){let L=0,ok=0;for(const p of S.pts){const q=S.net.predict(p.x,p.y);L+=-(p.c*Math.log(q+1e-9)+(1-p.c)*Math.log(1-q+1e-9));if((q>.5)===(p.c===1))ok++}L/=S.pts.length;S.hist.push(L);if(S.hist.length>500)S.hist=S.hist.filter((_,i)=>i%2===0);$('#tL').textContent=L.toFixed(3);$('#tA').textContent=(ok/S.pts.length*100).toFixed(1)+'%';$('#tEp').textContent=Math.floor(S.steps*10/S.pts.length)}
+  function render(){const N=70,img=octx.createImageData(N,N);for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x=-1.2+2.4*(i+.5)/N,y=1.2-2.4*(j+.5)/N,p=S.net.predict(x,y),t=(p-.5)*2;const col=t>=0?mix(COL.base,COL.cyan,t*.75):mix(COL.base,COL.pink,-t*.75);const k=(j*N+i)*4;img.data[k]=col[0];img.data[k+1]=col[1];img.data[k+2]=col[2];img.data[k+3]=255}octx.putImageData(img,0,0)}
+  function thumbs(){const G=18,net=S.net,L=net.s.length;const store=net.s.map(n=>Array.from({length:n},()=>new Float32Array(G*G)));
+    for(let j=0;j<G;j++)for(let i=0;i<G;i++){const x=-1.2+2.4*(i+.5)/G,y=1.2-2.4*(j+.5)/G;const{A}=net.forward([x,y]);for(let l=0;l<L;l++)for(let k=0;k<net.s[l];k++)store[l][k][j*G+i]=A[l][k]}
+    S.thumbs=store.map((layer,l)=>layer.map(arr=>{const cvs=document.createElement('canvas');cvs.width=cvs.height=G;const cx=cvs.getContext('2d'),img=cx.createImageData(G,G);let mx=1e-6;if(l>0&&net.act==='relu')for(const v of arr)mx=Math.max(mx,Math.abs(v));
+      for(let q=0;q<G*G;q++){let v=arr[q];if(l===L-1||net.act==='sigmoid')v=(v-.5)*2;else if(l>0&&net.act==='relu')v=v/mx;else if(l===0)v=v/1.2;const col=valCol(v);img.data[q*4]=col[0];img.data[q*4+1]=col[1];img.data[q*4+2]=col[2];img.data[q*4+3]=255}cx.putImageData(img,0,0);return cvs}))}
+  seg($('#tData'),[['circle','◎ Circle'],['xor','⊞ XOR'],['gauss','⁘ Clusters'],['spiral','🌀 Spiral']],S.data,k=>{S.data=k;gen();reset()});
+  slider($('#tNoise'),'Noise',0,1,.05,S.noise,v=>{S.noise=v;gen();reset()});
+  layerEditor($('#tLed'),S.hidden,{maxN:10,maxL:5,minL:1,fixed:0},reset);
+  seg($('#tAct'),[['tanh','Tanh'],['relu','ReLU'],['sigmoid','Sigmoid']],S.act,k=>{S.act=k;reset()});
+  seg($('#tLr'),[[.003,'0.003'],[.01,'0.01'],[.03,'0.03'],[.1,'0.1'],[.3,'0.3'],[1,'1']],S.lr,k=>S.lr=k);
+  const pb=$('#tPlay');pb.onclick=()=>{S.play=!S.play;pb.textContent=S.play?'⏸ Pause':'▶ Train'};
+  $('#tStep').onclick=()=>{for(let i=0;i<30;i++)step();render();thumbs();evalAll()};$('#tReset').onclick=reset;
+  gen();reset();
+  pages.train={enter(){if(!S.play){S.play=true;pb.textContent='⏸ Pause'}},frame(){S.tick++;
+    if(S.play){for(let i=0;i<6;i++)step();if(S.tick%2===0)render();if(S.tick%6===0)evalAll();if(S.tick%18===0)thumbs()}
+    const{c,w,h}=fit(cv);c.imageSmoothingEnabled=true;c.drawImage(off,0,0,w,h);const M=v=>(v+1.2)/2.4;
+    c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=1;for(let g=-1;g<=1;g+=.5){c.beginPath();c.moveTo(M(g)*w,0);c.lineTo(M(g)*w,h);c.moveTo(0,M(g)*h);c.lineTo(w,M(g)*h);c.stroke()}
+    for(const p of S.pts){const x=M(p.x)*w,y=(1-M(p.y))*h;c.fillStyle=rgba(p.c?COL.cyan:COL.pink,1);c.strokeStyle='#fff';c.lineWidth=1.2;c.beginPath();c.arc(x,y,4,0,TAU);c.fill();c.stroke()}
+    // loss
+    const L=fit(lc);L.c.clearRect(0,0,L.w,L.h);const H=S.hist;if(H.length>1){const mx=Math.max(...H,.1);L.c.beginPath();H.forEach((v,i)=>{const x=i/(H.length-1)*L.w,y=L.h-6-(v/mx)*(L.h-14);i?L.c.lineTo(x,y):L.c.moveTo(x,y)});L.c.strokeStyle=rgba(COL.amber,1);L.c.lineWidth=2;L.c.stroke();L.c.lineTo(L.w,L.h);L.c.lineTo(0,L.h);L.c.closePath();const g=L.c.createLinearGradient(0,0,0,L.h);g.addColorStop(0,rgba(COL.amber,.3));g.addColorStop(1,rgba(COL.amber,0));L.c.fillStyle=g;L.c.fill()}
+    // net diagram
+    const D=fit(nc),dc=D.c;dc.clearRect(0,0,D.w,D.h);const s=S.net.s,nl=s.length,mxn=Math.max(...s),T=Math.min(30,(D.h-20)/mxn-6,(D.w-20)/nl*.45);const X=l=>12+T/2+l*(D.w-24-T)/(nl-1),Y=(l,i)=>D.h/2+(i-(s[l]-1)/2)*(T+6);
+    for(let l=0;l<nl-1;l++){const n=s[l+1],m=s[l],W=S.net.W[l];for(let i=0;i<n;i++)for(let j=0;j<m;j++){const wt=W[i*m+j];dc.strokeStyle=rgba(wt>=0?COL.cyan:COL.pink,Math.min(.85,.1+Math.abs(wt)*.3));dc.lineWidth=Math.min(4,.4+Math.abs(wt)*1.2);dc.beginPath();dc.moveTo(X(l)+T/2,Y(l,j));dc.lineTo(X(l+1)-T/2,Y(l+1,i));dc.stroke()}}
+    S.thumbs.forEach((layer,l)=>layer.forEach((t,i)=>{if(!s[l]||i>=s[l])return;const x=X(l)-T/2,y=Y(l,i)-T/2;dc.imageSmoothingEnabled=false;dc.drawImage(t,x,y,T,T);dc.strokeStyle='rgba(255,255,255,.35)';dc.lineWidth=1;dc.strokeRect(x,y,T,T)}));
+    dc.fillStyle='#8a92c4';dc.font='10px JetBrains Mono';dc.textAlign='center';dc.fillText('x,y',X(0),D.h-4);dc.fillText('out',X(nl-1),D.h-4)}};
+})();
+
+// ===================== OPTIMIZERS =====================
+(()=>{const FN={
+    rosen:{n:'Banana valley',f:(x,y)=>(1-x)**2+5*(y-x*x)**2,d:[-2,2,-1,3],s:[-1.6,2.6],min:[1,1],note:'The <b>Rosenbrock</b> function: finding the valley is easy, crawling along its flat curved floor is hard. Momentum-based methods shine here.'},
+    bowl:{n:'Narrow bowl',f:(x,y)=>.5*x*x+6*y*y,d:[-4,4,-3,3],s:[-3.6,2.3],min:[0,0],note:'An ill-conditioned bowl: steep in one direction, shallow in the other. Plain <b>SGD zig-zags</b>; adaptive methods (RMSProp, Adam) rescale each direction.'},
+    saddle:{n:'Saddle point',f:(x,y)=>x*x-y*y+.1*y**4,d:[-3,3,-3.3,3.3],s:[2.6,.03],min:null,note:'Start near a <b>saddle point</b>: the gradient almost vanishes, so SGD stalls for ages. Momentum and Adam escape much faster.'},
+    multi:{n:'Many minima',f:(x,y)=>(x*x+y*y)/10-1.5*Math.exp(-((x-1.6)**2+(y-1.2)**2)/1.2)-.9*Math.exp(-((x+1.5)**2+(y+1.3)**2)/.9)+.25*Math.sin(2*x)*Math.sin(2*y),d:[-4,4,-4,4],s:[-3.2,3.3],min:null,note:'A bumpy landscape with <b>local minima</b>. Which valley each optimizer settles in depends on where it starts and how much momentum it carries.'}};
+  const OPT=[{k:'sgd',n:'SGD',col:COL.pink,lr:.01},{k:'mom',n:'Momentum',col:COL.amber,lr:.004},{k:'rms',n:'RMSProp',col:COL.lime,lr:.015},{k:'adam',n:'Adam',col:COL.cyan,lr:.03}];
+  const S={fn:'rosen',start:null,spd:1,play:true,heat:null,hk:'',tick:0};const cv=$('#oCv');
+  function reset(){const F=FN[S.fn],s=S.start||F.s;OPT.forEach(o=>Object.assign(o,{x:s[0],y:s[1],vx:0,vy:0,sx:0,sy:0,mx:0,my:0,ax:0,ay:0,t:0,trail:[[s[0],s[1]]],dead:false}));$('#oNote').innerHTML=F.note}
+  function grad(f,x,y){const e=1e-4;return[(f(x+e,y)-f(x-e,y))/(2*e),(f(x,y+e)-f(x,y-e))/(2*e)]}
+  function step(o){if(o.dead)return;const F=FN[S.fn],[gx,gy]=grad(F.f,o.x,o.y),lr=o.lr*S.spd;
+    if(o.k==='sgd'){o.x-=lr*gx;o.y-=lr*gy}
+    else if(o.k==='mom'){o.vx=.9*o.vx+gx;o.vy=.9*o.vy+gy;o.x-=lr*o.vx;o.y-=lr*o.vy}
+    else if(o.k==='rms'){o.sx=.99*o.sx+.01*gx*gx;o.sy=.99*o.sy+.01*gy*gy;o.x-=lr*gx/(Math.sqrt(o.sx)+1e-8);o.y-=lr*gy/(Math.sqrt(o.sy)+1e-8)}
+    else{o.t++;o.mx=.9*o.mx+.1*gx;o.my=.9*o.my+.1*gy;o.ax=.999*o.ax+.001*gx*gx;o.ay=.999*o.ay+.001*gy*gy;const b1=1-.9**o.t,b2=1-.999**o.t;o.x-=lr*(o.mx/b1)/(Math.sqrt(o.ax/b2)+1e-8);o.y-=lr*(o.my/b1)/(Math.sqrt(o.ay/b2)+1e-8)}
+    const d=F.d;if(!isFinite(o.x)||!isFinite(o.y)||o.x<d[0]-2||o.x>d[1]+2||o.y<d[2]-2||o.y>d[3]+2){o.dead=true;return}
+    o.trail.push([o.x,o.y]);if(o.trail.length>3000)o.trail.shift()}
+  function heat(w,h){const key=S.fn+w+'x'+h;if(S.hk===key)return;S.hk=key;const F=FN[S.fn],d=F.d,GW=220,GH=Math.round(220*h/w),vals=new Float32Array(GW*GH);let mn=1e9,mx=-1e9;
+    for(let j=0;j<GH;j++)for(let i=0;i<GW;i++){const x=d[0]+(d[1]-d[0])*(i+.5)/GW,y=d[3]-(d[3]-d[2])*(j+.5)/GH,v=F.f(x,y);vals[j*GW+i]=v;mn=Math.min(mn,v);mx=Math.max(mx,v)}
+    const stops=[[4,5,20],[30,18,80],[95,35,150],[200,60,150],[245,120,90],[251,200,60],[255,248,210]];const pal=t=>{t=clamp(t,0,1)*(stops.length-1);const i=Math.min(stops.length-2,Math.floor(t));return mix(stops[i],stops[i+1],t-i)};
+    const c=document.createElement('canvas');c.width=GW;c.height=GH;const cx=c.getContext('2d'),img=cx.createImageData(GW,GH),lg=Math.log(1+mx-mn);
+    for(let q=0;q<GW*GH;q++){const t=Math.log(1+vals[q]-mn)/lg;let col=pal(t*.92);const band=t*16;if(band-Math.floor(band)<.08)col=mix(col,COL.white,.25);img.data[q*4]=col[0];img.data[q*4+1]=col[1];img.data[q*4+2]=col[2];img.data[q*4+3]=255}cx.putImageData(img,0,0);S.heat=c}
+  seg($('#oFn'),Object.keys(FN).map(k=>[k,FN[k].n]),S.fn,k=>{S.fn=k;S.start=null;reset()});
+  slider($('#oSpd'),'Learning-rate multiplier',.2,3,.1,1,v=>S.spd=v,1);
+  const pb=$('#oPlay');pb.onclick=()=>{S.play=!S.play;pb.textContent=S.play?'⏸ Pause':'▶ Play'};$('#oReset').onclick=reset;
+  cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),d=FN[S.fn].d;S.start=[d[0]+(d[1]-d[0])*(e.clientX-r.left)/r.width,d[3]-(d[3]-d[2])*(e.clientY-r.top)/r.height];reset()});
+  $('#oLeg').innerHTML=OPT.map(o=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span class="row" style="gap:8px"><i style="width:12px;height:12px;border-radius:50%;background:${rgba(o.col,1)};box-shadow:0 0 10px ${rgba(o.col,1)}"></i>${o.n}</span><b style="font-family:JetBrains Mono;font-size:13px" id="ol-${o.k}">–</b></div>`).join('');
+  reset();
+  pages.optim={frame(){S.tick++;const{c,w,h}=fit(cv);heat(Math.round(w),Math.round(h));c.imageSmoothingEnabled=true;c.drawImage(S.heat,0,0,w,h);const F=FN[S.fn],d=F.d,X=x=>(x-d[0])/(d[1]-d[0])*w,Y=y=>(d[3]-y)/(d[3]-d[2])*h;
+    if(S.play)for(let i=0;i<2;i++)OPT.forEach(step);
+    if(F.min){const x=X(F.min[0]),y=Y(F.min[1]);c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y);c.moveTo(x,y-8);c.lineTo(x,y+8);c.stroke();c.font='11px JetBrains Mono';c.fillStyle='#fff';c.textAlign='left';c.fillText('global min',x+10,y-8)}
+    OPT.forEach(o=>{c.strokeStyle=rgba(o.col,.9);c.lineWidth=2;c.beginPath();o.trail.forEach(([x,y],i)=>i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y)));c.stroke();const x=X(o.x),y=Y(o.y);glow(c,x,y,20,o.col,.8);c.fillStyle='#fff';c.beginPath();c.arc(x,y,5,0,TAU);c.fill();c.strokeStyle=rgba(o.col,1);c.lineWidth=2;c.stroke();
+      if(S.tick%8===0){const el=$('#ol-'+o.k);if(el)el.textContent=o.dead?'diverged':F.f(o.x,o.y).toFixed(4)}});
+    const s=OPT[0].trail[0];c.strokeStyle='rgba(255,255,255,.8)';c.setLineDash([3,3]);c.beginPath();c.arc(X(s[0]),Y(s[1]),11,0,TAU);c.stroke();c.setLineDash([])}};
+})();
+
+// ===================== CNN =====================
+(()=>{const KER={vert:{n:'Vertical edge',k:[-1,0,1,-2,0,2,-1,0,1]},horz:{n:'Horizontal edge',k:[-1,-2,-1,0,0,0,1,2,1]},outline:{n:'Outline',k:[-1,-1,-1,-1,8,-1,-1,-1,-1]},sharpen:{n:'Sharpen',k:[0,-1,0,-1,5,-1,0,-1,0]},blur:{n:'Blur',k:[1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9]},emboss:{n:'Emboss',k:[-2,-1,0,-1,1,1,0,1,2]}};
+  const S={img:new Float32Array(784),kern:KER.vert.k.slice(),out:new Float32Array(676),scan:-1,insp:13*26+13,draw:false,relu:true,sample:0,dirty:true};
+  const cin=$('#cIn'),cout=$('#cOut'),cpool=$('#cPool'),kg=$('#cKg');
+  const conv=(img,k)=>{const o=new Float32Array(676);for(let y=0;y<26;y++)for(let x=0;x<26;x++){let s=0;for(let dy=0;dy<3;dy++)for(let dx=0;dx<3;dx++)s+=img[(y+dy)*28+x+dx]*k[dy*3+dx];o[y*26+x]=s}return o};
+  function paint(cx,cy,r=1.6){for(let y=Math.floor(cy-r-1);y<=cy+r+1;y++)for(let x=Math.floor(cx-r-1);x<=cx+r+1;x++){if(x<0||y<0||x>27||y>27)continue;const d=Math.hypot(x+.5-cx,y+.5-cy);const v=clamp(1.3-d/r,0,1);if(v>S.img[y*28+x])S.img[y*28+x]=v}S.dirty=true}
+  function line(a,b,c2,d){const n=Math.ceil(Math.hypot(c2-a,d-b)*3);for(let i=0;i<=n;i++)paint(lerp(a,c2,i/n),lerp(b,d,i/n))}
+  function sample(){S.img.fill(0);const k=S.sample++%3;if(k===0){line(7,7,21,7);line(21,7,12,23)}else if(k===1){for(let i=0;i<=60;i++){const a=i/60*TAU;paint(14+6*Math.cos(a),14+8.5*Math.sin(a))}}else{line(17,5,7,17);line(7,17,22,17);line(17,5,17,23)}S.dirty=true}
+  function kgRender(){kg.innerHTML='';S.kern.forEach((v,i)=>{const inp=document.createElement('input');inp.value=+v.toFixed(2);inp.oninput=()=>{const n=parseFloat(inp.value);if(!isNaN(n)){S.kern[i]=n;S.dirty=true}};kg.appendChild(inp)})}
+  seg($('#cK'),Object.keys(KER).map(k=>[k,KER[k].n]),'vert',k=>{S.kern=KER[k].k.slice();kgRender();S.dirty=true});kgRender();
+  const pos=e=>{const r=cin.getBoundingClientRect();return[(e.clientX-r.left)/r.width*28,(e.clientY-r.top)/r.height*28]};let last=null;
+  cin.addEventListener('pointerdown',e=>{S.draw=true;S.scan=-1;last=pos(e);paint(...last);cin.setPointerCapture(e.pointerId)});
+  cin.addEventListener('pointermove',e=>{if(!S.draw)return;const p=pos(e);line(last[0],last[1],p[0],p[1]);last=p});
+  cin.addEventListener('pointerup',()=>S.draw=false);
+  cout.addEventListener('mousemove',e=>{if(S.scan>=0)return;const r=cout.getBoundingClientRect();const x=clamp(Math.floor((e.clientX-r.left)/r.width*26),0,25),y=clamp(Math.floor((e.clientY-r.top)/r.height*26),0,25);S.insp=y*26+x});
+  $('#cClear').onclick=()=>{S.img.fill(0);S.scan=-1;S.dirty=true};$('#cSample').onclick=()=>{sample();S.scan=-1};$('#cScan').onclick=()=>{S.scan=0};$('#cRelu').onchange=e=>{S.relu=e.target.checked};
+  sample();
+  const cellVal=v=>S.relu?Math.max(0,v):v;
+  pages.cnn={frame(){if(S.dirty){S.out=conv(S.img,S.kern);S.dirty=false;S.allDirty=true}
+    if(S.scan>=0){S.scan+=4;S.insp=Math.min(675,S.scan);if(S.scan>=676+40)S.scan=-1}
+    const lim=S.scan>=0?Math.min(676,S.scan):676;let mx=1e-6;for(let i=0;i<676;i++)mx=Math.max(mx,Math.abs(S.out[i]));
+    const ix=S.insp%26,iy=Math.floor(S.insp/26);
+    // input
+    let{c,w}=fit(cin);let cs=w/28;c.fillStyle='#05060f';c.fillRect(0,0,w,w);for(let i=0;i<784;i++){const v=S.img[i];if(v>0){c.fillStyle=rgba(mix([20,22,50],[235,240,255],v),1);c.fillRect((i%28)*cs,Math.floor(i/28)*cs,cs+.5,cs+.5)}}
+    c.strokeStyle='rgba(255,255,255,.05)';c.lineWidth=1;for(let i=1;i<28;i++){c.beginPath();c.moveTo(i*cs,0);c.lineTo(i*cs,w);c.moveTo(0,i*cs);c.lineTo(w,i*cs);c.stroke()}
+    glow(c,(ix+1.5)*cs,(iy+1.5)*cs,cs*4,COL.violet,.35);c.strokeStyle=rgba(COL.violet,1);c.lineWidth=2.5;c.strokeRect(ix*cs,iy*cs,cs*3,cs*3);
+    // output
+    ({c,w}=fit(cout));cs=w/26;c.fillStyle='#05060f';c.fillRect(0,0,w,w);for(let i=0;i<lim;i++){const v=cellVal(S.out[i])/mx;c.fillStyle=rgba(valCol(v),1);c.fillRect((i%26)*cs,Math.floor(i/26)*cs,cs+.5,cs+.5)}
+    glow(c,(ix+.5)*cs,(iy+.5)*cs,cs*3,COL.lime,.6);c.strokeStyle=rgba(COL.lime,1);c.lineWidth=2;c.strokeRect(ix*cs,iy*cs,cs,cs);
+    // pool
+    ({c,w}=fit(cpool));cs=w/13;c.fillStyle='#05060f';c.fillRect(0,0,w,w);if(lim>=676)for(let y=0;y<13;y++)for(let x=0;x<13;x++){let m=-1e9;for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++)m=Math.max(m,cellVal(S.out[(y*2+dy)*26+x*2+dx]));c.fillStyle=rgba(valCol(m/mx),1);c.fillRect(x*cs,y*cs,cs+.5,cs+.5)}else{c.fillStyle='#8a92c4';c.font='13px JetBrains Mono';c.textAlign='center';c.fillText('waiting for scan…',w/2,w/2)}
+    // calc
+    const patch=[];for(let dy=0;dy<3;dy++)for(let dx=0;dx<3;dx++)patch.push(S.img[(iy+dy)*28+ix+dx]);const sum=S.out[S.insp];
+    $('#cCalc').innerHTML=`position (${ix}, ${iy})<br><br><span class="mat">${patch.map(v=>`<div style="background:${rgba(mix([20,22,50],[235,240,255],v),.9)};color:${v>.5?'#000':'#fff'}">${v.toFixed(2)}</div>`).join('')}</span> <span style="font-size:20px;margin:0 8px">⊙</span> <span class="mat">${S.kern.map(v=>`<div class="${v>0?'c-cy':v<0?'c-pk':''}">${(+v).toFixed(2)}</div>`).join('')}</span> <span style="font-size:20px;margin:0 8px">=</span> <b class="c-li" style="font-size:18px">${sum.toFixed(2)}</b><br><br>Σ (pixel × weight) = ${sum.toFixed(3)} → ReLU → <b class="c-li">${Math.max(0,sum).toFixed(3)}</b>`;
+    // all kernels
+    if(S.allDirty||!S.allC){S.allDirty=false;const keys=Object.keys(KER);S.allC=keys.map(k=>{const o=conv(S.img,KER[k].k);let m=1e-6;o.forEach(v=>m=Math.max(m,Math.abs(v)));const cc=document.createElement('canvas');cc.width=cc.height=26;const x=cc.getContext('2d'),img=x.createImageData(26,26);for(let i=0;i<676;i++){const col=valCol(Math.max(0,o[i])/m);img.data[i*4]=col[0];img.data[i*4+1]=col[1];img.data[i*4+2]=col[2];img.data[i*4+3]=255}x.putImageData(img,0,0);return{c:cc,n:KER[k].n}})}
+    const A=fit($('#cAll'));A.c.clearRect(0,0,A.w,A.h);const n=S.allC.length,sz=Math.min(A.h-24,(A.w-(n-1)*10)/n),tot=n*sz+(n-1)*10,x0=(A.w-tot)/2;A.c.imageSmoothingEnabled=false;
+    S.allC.forEach((o,i)=>{const x=x0+i*(sz+10);A.c.drawImage(o.c,x,0,sz,sz);A.c.strokeStyle='rgba(167,139,250,.4)';A.c.strokeRect(x,0,sz,sz);A.c.fillStyle='#8a92c4';A.c.font='10px JetBrains Mono';A.c.textAlign='center';A.c.fillText(o.n,x+sz/2,sz+14)})}};
+})();
+
+// ===================== ATTENTION =====================
+(()=>{const S={toks:[],att:[],head:'coref',mask:false,hover:-1,auto:0,tick:0,flow:0};const cv=$('#aCv'),mc=$('#aMat');
+  const STOP=new Set('the a an and or but because of to in on at for with was is are were be it its he she they them him her this that up as by from so then'.split(' '));
+  const PRON=new Set(['it','he','she','they','him','her','them','this','its','their','his']);
+  const hash=s=>{let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+  const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  const emb=t=>{const r=rng(hash(t.toLowerCase()));return Array.from({length:16},()=>r()*2-1)};
+  const HEADS={coref:{n:'Head 1 · Coreference',d:'Pronouns look back at the nouns they likely refer to ("it" → "ball", "robot").'},prev:{n:'Head 2 · Previous token',d:'Each token attends to the token right before it, a positional head that helps track word order.'},sem:{n:'Head 3 · Semantic',d:'Tokens attend to others with similar (hashed) embeddings: a stand-in for meaning-based similarity.'},broad:{n:'Head 4 · Broad / sink',d:'Attention spreads widely and dumps much of its weight on the first token, a pattern often seen in trained models ("attention sink").'}};
+  function compute(){const raw=$('#aTxt').value.match(/[A-Za-z0-9']+|[.,!?;]/g)||['…'];S.toks=raw.slice(0,16);const T=S.toks,n=T.length,E=T.map(emb);
+    S.att=T.map((ti,i)=>{let sc=T.map((tj,j)=>{const lt=ti.toLowerCase(),lj=tj.toLowerCase();
+        if(S.head==='prev')return j===i-1?4:j===i?(i===0?4:1):0;
+        if(S.head==='broad')return j===0?2.6:j===i?1.4:.4;
+        if(S.head==='sem'){let d=0;for(let k=0;k<16;k++)d+=E[i][k]*E[j][k];return d/2+(i===j?1.2:0)+(lt===lj&&i!==j?2:0)}
+        if(PRON.has(lt)){if(j<i&&!STOP.has(lj)&&!PRON.has(lj)&&/[a-z]/i.test(lj))return 3.2-.12*(i-j)+(lj.length>3?.4:0);return j===i?.8:-1}
+        return j===i?2.2:Math.abs(i-j)===1?1:0});
+      if(S.mask)sc=sc.map((v,j)=>j>i?-Infinity:v);const m=Math.max(...sc),ex=sc.map(v=>Math.exp(v-m)),s=ex.reduce((a,b)=>a+b,0);return ex.map(v=>v/s)});
+    $('#aNote').innerHTML=`<b>${HEADS[S.head].n}.</b> ${HEADS[S.head].d}`}
+  seg($('#aHead'),Object.keys(HEADS).map(k=>[k,HEADS[k].n]),S.head,k=>{S.head=k;compute()});
+  $('#aTxt').oninput=compute;$('#aMask').onchange=e=>{S.mask=e.target.checked;compute()};
+  let lay={top:[],bot:[]};
+  cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let h=-1;lay.top.forEach((t,i)=>{if(Math.abs(x-t.x)<t.w/2+4&&Math.abs(y-t.y)<22)h=i});S.hover=h});cv.addEventListener('mouseleave',()=>S.hover=-1);
+  compute();
+  pages.attention={frame(){S.tick++;S.flow=(S.flow+.012)%1;const{c,w,h}=fit(cv);c.clearRect(0,0,w,h);const T=S.toks,n=T.length;if(S.tick%110===0)S.auto=(S.auto+1)%n;const F=S.hover>=0?S.hover:S.auto;
+    const fs=clamp(w/(n*5.2),10,16);c.font=`600 ${fs}px Space Grotesk`;const slot=w/n,ty=46,by=h-70;lay.top=T.map((t,i)=>({x:slot*(i+.5),y:ty,w:Math.min(slot-6,c.measureText(t).width+16)}));lay.bot=T.map((t,i)=>({x:slot*(i+.5),y:by,w:lay.top[i].w}));
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){const a=S.att[i][j];if(a<.02||i===F)continue;const A=lay.top[i],B=lay.bot[j];c.strokeStyle=rgba(COL.violet,a*.22);c.lineWidth=1;c.beginPath();c.moveTo(A.x,A.y+16);c.bezierCurveTo(A.x,(ty+by)/2,B.x,(ty+by)/2,B.x,B.y-16);c.stroke()}
+    for(let j=0;j<n;j++){const a=S.att[F][j];if(a<.01)continue;const A=lay.top[F],B=lay.bot[j];const col=mix(COL.violet,COL.cyan,a);c.strokeStyle=rgba(col,.25+a*.75);c.lineWidth=1+a*10;c.beginPath();c.moveTo(A.x,A.y+16);c.bezierCurveTo(A.x,(ty+by)/2,B.x,(ty+by)/2,B.x,B.y-16);c.stroke();
+      for(let q=0;q<2;q++){const t=(S.flow+q*.5)%1,u=1-t;const p0=[A.x,A.y+16],p1=[A.x,(ty+by)/2],p2=[B.x,(ty+by)/2],p3=[B.x,B.y-16];const x=u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],y=u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1];glow(c,x,y,4+a*12,COL.cyan,.4+a*.5)}}
+    c.textAlign='center';c.textBaseline='middle';
+    const pill=(t,o,on,a)=>{c.fillStyle=on?rgba(COL.violet,.35):rgba(COL.base,.9);c.strokeStyle=on?rgba(COL.cyan,1):'rgba(130,145,255,.35)';c.lineWidth=on?2:1;c.beginPath();c.roundRect(o.x-o.w/2,o.y-15,o.w,30,9);c.fill();c.stroke();if(a!==undefined){glow(c,o.x,o.y,o.w*.7,COL.cyan,a*.6)}c.fillStyle='#fff';c.fillText(t,o.x,o.y)};
+    T.forEach((t,i)=>pill(t,lay.top[i],i===F));T.forEach((t,j)=>{const a=S.att[F][j];pill(t,lay.bot[j],false,a);c.fillStyle=rgba(COL.cyan,.85);const bh=a*36;c.fillRect(lay.bot[j].x-8,by+22,16,bh);c.fillStyle='#8a92c4';c.font='10px JetBrains Mono';c.fillText((a*100).toFixed(0)+'%',lay.bot[j].x,by+30+Math.max(bh,6));c.font=`600 ${fs}px Space Grotesk`});
+    c.fillStyle='#8a92c4';c.font='11px JetBrains Mono';c.textAlign='left';c.fillText('QUERY (looking)',4,12);c.fillText('KEYS (looked at)',4,by-30);
+    const M=fit(mc),mcx=M.c;mcx.clearRect(0,0,M.w,M.h);const pad=56,cs=(M.w-pad)/n;mcx.font=`${clamp(cs*.4,8,11)}px JetBrains Mono`;
+    for(let i=0;i<n;i++){for(let j=0;j<n;j++){const a=S.att[i][j];mcx.fillStyle=rgba(mix(COL.base,i===F?COL.cyan:COL.violet,Math.sqrt(a)),1);mcx.fillRect(pad+j*cs,pad+i*cs,cs-1,cs-1)}
+      mcx.fillStyle=i===F?'#22d3ee':'#8a92c4';mcx.textAlign='right';mcx.textBaseline='middle';mcx.fillText(T[i].slice(0,6),pad-4,pad+i*cs+cs/2);
+      mcx.save();mcx.translate(pad+i*cs+cs/2,pad-4);mcx.rotate(-Math.PI/3);mcx.textAlign='left';mcx.fillStyle='#8a92c4';mcx.fillText(T[i].slice(0,6),0,0);mcx.restore()}
+    mcx.strokeStyle=rgba(COL.cyan,1);mcx.lineWidth=1.5;mcx.strokeRect(pad,pad+F*cs,n*cs,cs)}};
+})();
+
+// ===================== START =====================
+initBg();route();
+(function loop(){drawBg();const p=pages[current];if(p&&p.frame)p.frame();requestAnimationFrame(loop)})();
+</script>
+</body>
+</html>
